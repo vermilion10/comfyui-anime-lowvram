@@ -9,6 +9,8 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 - **Low-VRAM hires workflow**: base image, 1.5x upscale and second pass, tiled VAE encode and decode so SDXL fits in 4 GB
 - **Face detailer workflow**: redraws small faces at high resolution, fixing broken eyes in full-body shots
 - **Fix faces workflow**: repairs the face of an existing image without changing anything else
+- **Close-up / wide workflow**: landscape or square portraits and upper-body shots at about 1 megapixel
+- **Two-character workflow**: regional prompting with one prompt per character, so features do not bleed between them
 - **Style reference workflow**: IP-Adapter colour and lighting reference from up to three images
 - **Image to tags workflow**: WD EVA02 tagger that turns any image into Danbooru tags
 - **Anime Post FX node**: bloom, chromatic aberration, vignette and film grain, processed on the CPU
@@ -69,11 +71,23 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 | `sdxl_anime_lowvram` | Minimal base image with tiled VAE decode | about 40 s |
 | `sdxl_anime_hires_postfx` | Base, 1.5x hires pass, Post FX | about 150 s |
 | `sdxl_anime_hires_face` | Hires workflow plus FaceDetailer | about 200 s |
+| `sdxl_anime_closeup_wide` | Landscape or square close-ups, hires pass, Post FX | about 150 s |
+| `sdxl_anime_two_characters` | Two characters with separate regional prompts | about 150 s |
 | `fix_faces` | Redraw the face of an existing image | about 40 s |
 | `sdxl_anime_style_ref` | Hires workflow plus IP-Adapter style reference | about 170 s |
 | `image_to_tags` | Danbooru tags for any image | a few seconds |
 
 To explore prompts quickly, select the hires and finish groups and press **Ctrl+B** to bypass them. Once a base image looks right, set its seed to fixed and enable them again.
+
+### Two characters
+
+With a single prompt, SDXL models apply every tag to everyone in the image, so one character's hair colour, horns or outfit leaks onto the other. `sdxl_anime_two_characters` splits the prompt:
+
+- **Shared prompt**: scene, style, framing and the count tags (`1girl, 1boy`).
+- **Left / right character prompts**: each applies to 65% of the width, overlapping by 30% in the middle so the characters can touch.
+- The character prompts switch on at 20% of sampling, after the shared prompt has laid out the composition. Raise this to 0.3 if the characters drift apart; lower it to 0.1 if features still bleed.
+
+Keep each character's distinctive tags only in their own prompt, and use a landscape size. Characters standing directly in front of each other can still mix, since the regions are rectangles.
 
 ## Prompting tips
 
