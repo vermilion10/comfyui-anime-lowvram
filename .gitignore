@@ -1,0 +1,28 @@
+# Models and large binaries never belong in this repository
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.onnx
+*.gguf
+*.zip
+*.7z
+
+# Images, datasets and generated output
+*.png
+*.jpg
+*.jpeg
+*.webp
+output/
+input/
+datasets/
+tag_reports/
+lora_training/
+
+# Python and local state
+__pycache__/
+*.pyc
+_cache/
+*.log
+*.db
