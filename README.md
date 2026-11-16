@@ -10,6 +10,7 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 - **Face and hand detailer workflow**: redraws small faces and hands at high resolution, fixing broken eyes and fingers in full-body shots
 - **Fix faces workflow**: repairs the face and hands of an existing image without changing anything else
 - **Fix region workflow**: paint a mask over any broken area (feet, fabric, a missed hand) and redraw only that area
+- **Expand image workflow**: outpaints the background to a new aspect ratio, for example a portrait image into a 16:9 wallpaper, keeping the original pixels
 - **Close-up / wide workflow**: landscape or square portraits and upper-body shots at about 1 megapixel
 - **Two-character workflow**: regional prompting with one prompt per character, so features do not bleed between them
 - **Style reference workflow**: IP-Adapter colour and lighting reference from up to three images
@@ -77,6 +78,7 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 | `sdxl_anime_two_characters` | Two characters with separate regional prompts | about 150 s |
 | `fix_faces` | Redraw the face and hands of an existing image | about 80 to 120 s |
 | `fix_region` | Redraw an area you paint in the MaskEditor | about 30 s |
+| `expand_image` | Extend the background to a new aspect ratio | about 80 s |
 | `sdxl_anime_style_ref` | Hires workflow plus IP-Adapter style reference | about 170 s |
 | `image_to_tags` | Danbooru tags for any image | a few seconds |
 
@@ -95,6 +97,12 @@ Keep each character's distinctive tags only in their own prompt, and use a lands
 ### Fix region
 
 For problems no detector finds, such as feet. Right-click the **Image to fix** node, choose **Open in MaskEditor**, paint over the area and save. In the masked area prompt, describe only what belongs there (`barefoot, foot, toes`) plus the original artist tags; the full character prompt can make the model draw a face in the mask. Denoise 0.55 keeps the original shape, 0.65 redraws it with more detail but can add stray pieces.
+
+To remove an object, mask it, describe the background that should replace it (`flower field, no humans`), put the object's name in the negative prompt and use denoise 0.75 to 0.9.
+
+### Expand image
+
+Set the pixels to add on each side in **Pad image**. For a 1248x1824 image, `left 1000, right 1000` gives a 3248x1824 (16:9) wallpaper. Describe only the scenery in the background prompt, without character tags. The new area is generated at about 1.3 megapixels and blended under the untouched original, with `feathering` 200 to hide the seam.
 
 ## Prompting tips
 
