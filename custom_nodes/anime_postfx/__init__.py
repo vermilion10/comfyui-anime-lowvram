@@ -68,16 +68,26 @@ def _chromatic_aberration(img: torch.Tensor, amount_px: float) -> torch.Tensor:
     return torch.cat((r, g, bl), dim=1)
 
 
+def _vignette_falloff(h: int, w: int, device) -> torch.Tensor:
+    ys = torch.linspace(-1, 1, h, device=device).view(-1, 1)
+    xs = torch.linspace(-1, 1, w, device=device).view(1, -1)
+    r = torch.sqrt(xs ** 2 + ys ** 2) / (2 ** 0.5)
+    t = ((r - 0.35) / 0.65).clamp(0, 1)
+    return t * t * (3 - 2 * t)
+
+
 def _vignette(img: torch.Tensor, strength: float) -> torch.Tensor:
     if strength <= 0:
         return img
-    h, w = img.shape[-2:]
-    ys = torch.linspace(-1, 1, h, device=img.device).view(-1, 1)
-    xs = torch.linspace(-1, 1, w, device=img.device).view(1, -1)
-    r = torch.sqrt(xs ** 2 + ys ** 2) / (2 ** 0.5)
-    t = ((r - 0.35) / 0.65).clamp(0, 1)
-    falloff = t * t * (3 - 2 * t)
+    falloff = _vignette_falloff(*img.shape[-2:], img.device)
     return img * (1.0 - strength * falloff)
+
+
+def _remove_vignette(img: torch.Tensor, strength: float) -> torch.Tensor:
+    if strength <= 0:
+        return img
+    falloff = _vignette_falloff(*img.shape[-2:], img.device)
+    return img / (1.0 - strength * falloff).clamp(min=0.05)
 
 
 def _grain(img: torch.Tensor, strength: float, seed: int) -> torch.Tensor:
@@ -130,5 +140,30 @@ class AnimePostFX:
         return (out.to(image.dtype),)
 
 
-NODE_CLASS_MAPPINGS = {"AnimePostFX": AnimePostFX}
-NODE_DISPLAY_NAME_MAPPINGS = {"AnimePostFX": "Anime Post FX"}
+class AnimeRemoveVignette:
+    """Undo the vignette of Anime Post FX, for example before expanding an image."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "vignette": ("FLOAT", {"default": 0.2, "min": 0.0, "max": 0.9, "step": 0.05,
+                                       "tooltip": "The vignette value the image was made with in Anime Post FX."}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "apply"
+    CATEGORY = "image/postprocessing"
+
+    def apply(self, image, vignette):
+        x = image.detach().to("cpu", torch.float32).movedim(-1, 1)
+        rgb, alpha = x[:, :3], x[:, 3:]
+        rgb = _remove_vignette(rgb, vignette)
+        out = torch.cat((rgb.clamp(0, 1), alpha), dim=1).movedim(1, -1)
+        return (out.to(image.dtype),)
+
+
+NODE_CLASS_MAPPINGS = {"AnimePostFX": AnimePostFX, "AnimeRemoveVignette": AnimeRemoveVignette}
+NODE_DISPLAY_NAME_MAPPINGS = {"AnimePostFX": "Anime Post FX", "AnimeRemoveVignette": "Anime Remove Vignette"}

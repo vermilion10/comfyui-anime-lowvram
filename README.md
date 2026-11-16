@@ -121,7 +121,7 @@ To remove an object, mask it, describe the background that should replace it (`f
 
 ### Expand image
 
-Set the pixels to add on each side in **Pad image**. For a 1248x1824 image, `left 1000, right 1000` gives a 3248x1824 (16:9) wallpaper. Describe only the scenery in the background prompt, without character tags. The new area is generated at about 1.3 megapixels and blended under the untouched original, with `feathering` 200 to hide the seam.
+Set the pixels to add on each side in **Pad image**. For a 1248x1824 image, `left 1000, right 1000` gives a 3248x1824 (16:9) wallpaper. Describe only the scenery in the background prompt, without character tags. The new area is generated at about 1.3 megapixels and blended under the untouched original, with `feathering` 200 to hide the seam. The workflow first removes the Post FX vignette (otherwise the dark edges continue into the new area) and re-applies it to the whole new canvas at the end; set both to 0 for images without a vignette.
 
 ## Prompting tips
 
@@ -144,6 +144,8 @@ Found under `image/postprocessing`. All effects run on the CPU.
 | `grain` | Film grain intensity |
 
 Set any effect to 0 to disable it.
+
+The pack also contains **Anime Remove Vignette**, the exact inverse of the vignette effect. Use it with the same value before editing or expanding an image that already has a vignette.
 
 ## Helper scripts
 
