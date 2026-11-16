@@ -1,0 +1,1777 @@
+{
+  "last_node_id": 28,
+  "last_link_id": 48,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        40,
+        240
+      ],
+      "size": [
+        340,
+        100
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1,
+            13,
+            22,
+            30
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            2,
+            3,
+            23,
+            31
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            8,
+            12,
+            18,
+            24,
+            32,
+            44
+          ],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "WAI-Nsfw-Illustrious-17.safetensors"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "CLIPTextEncode",
+      "pos": [
+        420,
+        80
+      ],
+      "size": [
+        420,
+        200
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "title": "Positive prompt",
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            14,
+            25,
+            33,
+            45
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, amazing quality, general, 1girl, solo, fox ears, fox tail, long hair, green eyes, smile, looking at viewer, white dress, frills, sitting on tree branch, holding basket, flowers, forest, foliage, blue sky, clouds, from below, full body, backlighting, rim lighting, dappled sunlight, sunbeam, light particles, depth of field"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "CLIPTextEncode",
+      "pos": [
+        420,
+        330
+      ],
+      "size": [
+        420,
+        160
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "title": "Negative prompt",
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            15,
+            26,
+            34,
+            46
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "bad quality, worst quality, worst detail, sketch, censor, nsfw, bad hands, watermark, signature"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "EmptyLatentImage",
+      "pos": [
+        420,
+        540
+      ],
+      "size": [
+        320,
+        110
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        832,
+        1216,
+        1
+      ]
+    },
+    {
+      "id": 5,
+      "type": "KSampler",
+      "pos": [
+        880,
+        80
+      ],
+      "size": [
+        320,
+        270
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "title": "KSampler (base)",
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 47
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 48
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        0,
+        "randomize",
+        25,
+        5.5,
+        "euler_ancestral",
+        "normal",
+        1.0
+      ]
+    },
+    {
+      "id": 6,
+      "type": "VAEDecodeTiled",
+      "pos": [
+        880,
+        400
+      ],
+      "size": [
+        320,
+        150
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            9,
+            10
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecodeTiled"
+      },
+      "widgets_values": [
+        512,
+        64,
+        64,
+        8
+      ]
+    },
+    {
+      "id": 7,
+      "type": "PreviewImage",
+      "pos": [
+        880,
+        600
+      ],
+      "size": [
+        320,
+        460
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "title": "Base preview",
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 9
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 8,
+      "type": "ImageScaleBy",
+      "pos": [
+        1260,
+        80
+      ],
+      "size": [
+        300,
+        90
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            11
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleBy"
+      },
+      "widgets_values": [
+        "lanczos",
+        1.5
+      ]
+    },
+    {
+      "id": 9,
+      "type": "VAEEncodeTiled",
+      "pos": [
+        1260,
+        220
+      ],
+      "size": [
+        300,
+        150
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 11
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            16
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncodeTiled"
+      },
+      "widgets_values": [
+        512,
+        64,
+        64,
+        8
+      ]
+    },
+    {
+      "id": 10,
+      "type": "KSampler",
+      "pos": [
+        1260,
+        420
+      ],
+      "size": [
+        300,
+        270
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "title": "KSampler (hires pass)",
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 13
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 14
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 15
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            17
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        0,
+        "fixed",
+        20,
+        5.5,
+        "euler_ancestral",
+        "normal",
+        0.4
+      ]
+    },
+    {
+      "id": 11,
+      "type": "VAEDecodeTiled",
+      "pos": [
+        1600,
+        80
+      ],
+      "size": [
+        300,
+        150
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 17
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            21
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecodeTiled"
+      },
+      "widgets_values": [
+        512,
+        64,
+        64,
+        8
+      ]
+    },
+    {
+      "id": 12,
+      "type": "AnimePostFX",
+      "pos": [
+        2380,
+        280
+      ],
+      "size": [
+        300,
+        250
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 37
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            20
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimePostFX"
+      },
+      "widgets_values": [
+        0.35,
+        40.0,
+        0.65,
+        2.0,
+        0.2,
+        0.02,
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "SaveImage",
+      "pos": [
+        2720,
+        80
+      ],
+      "size": [
+        460,
+        680
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 20
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "anime_final"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "Note",
+      "pos": [
+        40,
+        400
+      ],
+      "size": [
+        340,
+        300
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "How to use\n\n1. Pick your checkpoint in Load Checkpoint.\n2. While exploring prompts, select the hires-pass nodes (ImageScaleBy through Save Image) and press Ctrl+B to bypass them. You then only get the fast base preview.\n3. When you like an image, set the base KSampler seed to fixed, un-bypass the hires nodes (Ctrl+B again) and run once more.\n\nHires pass: denoise 0.35 to 0.45 adds detail. Higher values start changing the picture.\nIf the hires pass runs out of memory, lower scale_by to 1.3 or start ComfyUI with --lowvram.\n\nAnime Post FX: set any effect to 0 to turn it off.\n\nFace detailer: finds the face, redraws it at high resolution (guide_size 768) and pastes it back. This is what fixes small or broken eyes in full-body shots. denoise 0.35 to 0.5: higher changes the face more. To skip it, select the FaceDetailer node and press Ctrl+B.\n\nHand detailer: runs after the face detailer and redraws each detected hand (guide_size 512, denoise 0.4), which fixes most broken fingers. Adds about 40 s. To skip it, select the HandDetailer node and press Ctrl+B."
+      ]
+    },
+    {
+      "id": 15,
+      "type": "UltralyticsDetectorProvider",
+      "pos": [
+        1600,
+        800
+      ],
+      "size": [
+        300,
+        80
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "BBOX_DETECTOR",
+          "type": "BBOX_DETECTOR",
+          "links": [
+            27
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "SEGM_DETECTOR",
+          "type": "SEGM_DETECTOR",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UltralyticsDetectorProvider"
+      },
+      "widgets_values": [
+        "bbox/face_yolov8m.pt"
+      ]
+    },
+    {
+      "id": 16,
+      "type": "FaceDetailer",
+      "pos": [
+        1940,
+        80
+      ],
+      "size": [
+        360,
+        960
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 21
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 22
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 23
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 24
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 25
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 26
+        },
+        {
+          "name": "bbox_detector",
+          "type": "BBOX_DETECTOR",
+          "link": 27
+        },
+        {
+          "name": "sam_model_opt",
+          "type": "SAM_MODEL",
+          "link": null
+        },
+        {
+          "name": "segm_detector_opt",
+          "type": "SEGM_DETECTOR",
+          "link": null
+        },
+        {
+          "name": "detailer_hook",
+          "type": "DETAILER_HOOK",
+          "link": null
+        },
+        {
+          "name": "scheduler_func_opt",
+          "type": "SCHEDULER_FUNC",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            35
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "cropped_refined",
+          "type": "IMAGE",
+          "links": [
+            29
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "cropped_enhanced_alpha",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 2
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 3
+        },
+        {
+          "name": "detailer_pipe",
+          "type": "DETAILER_PIPE",
+          "links": [],
+          "slot_index": 4
+        },
+        {
+          "name": "cnet_images",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 5
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FaceDetailer"
+      },
+      "widgets_values": [
+        768,
+        true,
+        1024,
+        0,
+        "fixed",
+        20,
+        5.5,
+        "euler_ancestral",
+        "normal",
+        0.45,
+        5,
+        true,
+        true,
+        0.5,
+        10,
+        3.0,
+        "center-1",
+        0,
+        0.93,
+        0,
+        0.7,
+        "False",
+        10,
+        "",
+        1,
+        false,
+        20,
+        false,
+        false
+      ],
+      "title": "FaceDetailer (fixes eyes)"
+    },
+    {
+      "id": 17,
+      "type": "PreviewImage",
+      "pos": [
+        1600,
+        920
+      ],
+      "size": [
+        300,
+        300
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 29
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Detected face (refined)"
+    },
+    {
+      "id": 18,
+      "type": "UltralyticsDetectorProvider",
+      "pos": [
+        2340,
+        1080
+      ],
+      "size": [
+        300,
+        80
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "BBOX_DETECTOR",
+          "type": "BBOX_DETECTOR",
+          "links": [
+            36
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "SEGM_DETECTOR",
+          "type": "SEGM_DETECTOR",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UltralyticsDetectorProvider"
+      },
+      "widgets_values": [
+        "bbox/hand_yolov8s.pt"
+      ]
+    },
+    {
+      "id": 19,
+      "type": "FaceDetailer",
+      "pos": [
+        2340,
+        80
+      ],
+      "size": [
+        360,
+        960
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 35
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 30
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 31
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 32
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 33
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 34
+        },
+        {
+          "name": "bbox_detector",
+          "type": "BBOX_DETECTOR",
+          "link": 36
+        },
+        {
+          "name": "sam_model_opt",
+          "type": "SAM_MODEL",
+          "link": null
+        },
+        {
+          "name": "segm_detector_opt",
+          "type": "SEGM_DETECTOR",
+          "link": null
+        },
+        {
+          "name": "detailer_hook",
+          "type": "DETAILER_HOOK",
+          "link": null
+        },
+        {
+          "name": "scheduler_func_opt",
+          "type": "SCHEDULER_FUNC",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            37
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "cropped_refined",
+          "type": "IMAGE",
+          "links": [
+            38
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "cropped_enhanced_alpha",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 2
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 3
+        },
+        {
+          "name": "detailer_pipe",
+          "type": "DETAILER_PIPE",
+          "links": [],
+          "slot_index": 4
+        },
+        {
+          "name": "cnet_images",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 5
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FaceDetailer"
+      },
+      "widgets_values": [
+        512,
+        true,
+        1024,
+        0,
+        "fixed",
+        20,
+        5.5,
+        "euler_ancestral",
+        "normal",
+        0.4,
+        5,
+        true,
+        true,
+        0.4,
+        10,
+        2.5,
+        "center-1",
+        0,
+        0.93,
+        0,
+        0.7,
+        "False",
+        10,
+        "",
+        1,
+        false,
+        20,
+        false,
+        false
+      ],
+      "title": "HandDetailer (fixes fingers)"
+    },
+    {
+      "id": 20,
+      "type": "PreviewImage",
+      "pos": [
+        2340,
+        1200
+      ],
+      "size": [
+        300,
+        300
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "title": "Detected hands (refined)",
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 38
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 21,
+      "type": "LoadImage",
+      "pos": [
+        400,
+        1500
+      ],
+      "size": [
+        320,
+        420
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            39
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "pose_reference.png",
+        "image"
+      ],
+      "title": "Pose reference"
+    },
+    {
+      "id": 22,
+      "type": "DepthAnythingV2Preprocessor",
+      "pos": [
+        740,
+        1500
+      ],
+      "size": [
+        320,
+        110
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 39
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            40,
+            43
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DepthAnythingV2Preprocessor"
+      },
+      "widgets_values": [
+        "depth_anything_v2_vitb.pth",
+        1024
+      ],
+      "title": "Depth map (default guide)"
+    },
+    {
+      "id": 23,
+      "type": "DWPreprocessor",
+      "pos": [
+        740,
+        2020
+      ],
+      "size": [
+        320,
+        260
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "POSE_KEYPOINT",
+          "type": "POSE_KEYPOINT",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DWPreprocessor"
+      },
+      "widgets_values": [
+        "enable",
+        "enable",
+        "enable",
+        1024,
+        "yolox_l.onnx",
+        "dw-ll_ucoco_384.onnx",
+        "enable"
+      ],
+      "title": "DWPose (alternative for photos, unconnected)"
+    },
+    {
+      "id": 24,
+      "type": "PreviewImage",
+      "pos": [
+        740,
+        1630
+      ],
+      "size": [
+        320,
+        360
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 40
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Guide preview"
+    },
+    {
+      "id": 25,
+      "type": "ControlNetLoader",
+      "pos": [
+        1080,
+        1500
+      ],
+      "size": [
+        340,
+        60
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONTROL_NET",
+          "type": "CONTROL_NET",
+          "links": [
+            41
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ControlNetLoader"
+      },
+      "widgets_values": [
+        "controlnet-union-sdxl-promax.safetensors"
+      ]
+    },
+    {
+      "id": 26,
+      "type": "SetUnionControlNetType",
+      "pos": [
+        1080,
+        1590
+      ],
+      "size": [
+        340,
+        60
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "control_net",
+          "type": "CONTROL_NET",
+          "link": 41
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONTROL_NET",
+          "type": "CONTROL_NET",
+          "links": [
+            42
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SetUnionControlNetType"
+      },
+      "widgets_values": [
+        "depth"
+      ]
+    },
+    {
+      "id": 27,
+      "type": "ControlNetApplyAdvanced",
+      "pos": [
+        1080,
+        1680
+      ],
+      "size": [
+        340,
+        170
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 45
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 46
+        },
+        {
+          "name": "control_net",
+          "type": "CONTROL_NET",
+          "link": 42
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 43
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 44
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            47
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            48
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ControlNetApplyAdvanced"
+      },
+      "widgets_values": [
+        0.7,
+        0.0,
+        0.7
+      ],
+      "title": "Apply ControlNet"
+    },
+    {
+      "id": 28,
+      "type": "Note",
+      "pos": [
+        1440,
+        1500
+      ],
+      "size": [
+        380,
+        520
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Pose and composition reference (ControlNet)\n\nCopies the pose and composition of a reference image: a photo, a screenshot, another artwork, or one of your own renders.\n\n1. Drag the reference onto the Pose reference node.\n2. Set the size in Empty Latent Image to the same aspect ratio as the reference (portrait 832x1216, landscape 1216x832, square 1024x1024). A different ratio stretches the pose.\n3. Run. The Guide preview shows the depth map: near things light, far things dark.\n\nThe default guide is a depth map. It copies the layout, body shapes and who is in front, and works on anime and photo references alike. Prompts still decide the characters, outfits, colours and style.\n\nApply ControlNet:\n- strength 0.7: follows the layout closely. 0.5 gives more freedom; 0.9 copies it almost exactly.\n- end_percent 0.7: the guide shapes the first 70% of sampling, the last steps polish details freely.\n\nDWPose (stick-figure pose) is included but unconnected. It works on photos of real people and often fails on anime images. To use it, connect its IMAGE output to Apply ControlNet image and Guide preview, and set the type in Set Union ControlNet Type to openpose.\n\nThe guide only shapes the base pass; the hires pass and detailers work as usual.\nTo copy outlines instead of a pose (for example redrawing a sketch), change the type in Set Union ControlNet Type to canny/lineart and replace the DWPose node with an AnimeLineArt preprocessor."
+      ],
+      "title": "Pose reference: how to use"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      1,
+      1,
+      2,
+      0,
+      "CLIP"
+    ],
+    [
+      3,
+      1,
+      1,
+      3,
+      0,
+      "CLIP"
+    ],
+    [
+      6,
+      4,
+      0,
+      5,
+      3,
+      "LATENT"
+    ],
+    [
+      7,
+      5,
+      0,
+      6,
+      0,
+      "LATENT"
+    ],
+    [
+      8,
+      1,
+      2,
+      6,
+      1,
+      "VAE"
+    ],
+    [
+      9,
+      6,
+      0,
+      7,
+      0,
+      "IMAGE"
+    ],
+    [
+      10,
+      6,
+      0,
+      8,
+      0,
+      "IMAGE"
+    ],
+    [
+      11,
+      8,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      12,
+      1,
+      2,
+      9,
+      1,
+      "VAE"
+    ],
+    [
+      13,
+      1,
+      0,
+      10,
+      0,
+      "MODEL"
+    ],
+    [
+      14,
+      2,
+      0,
+      10,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      15,
+      3,
+      0,
+      10,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      16,
+      9,
+      0,
+      10,
+      3,
+      "LATENT"
+    ],
+    [
+      17,
+      10,
+      0,
+      11,
+      0,
+      "LATENT"
+    ],
+    [
+      18,
+      1,
+      2,
+      11,
+      1,
+      "VAE"
+    ],
+    [
+      20,
+      12,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      21,
+      11,
+      0,
+      16,
+      0,
+      "IMAGE"
+    ],
+    [
+      22,
+      1,
+      0,
+      16,
+      1,
+      "MODEL"
+    ],
+    [
+      23,
+      1,
+      1,
+      16,
+      2,
+      "CLIP"
+    ],
+    [
+      24,
+      1,
+      2,
+      16,
+      3,
+      "VAE"
+    ],
+    [
+      25,
+      2,
+      0,
+      16,
+      4,
+      "CONDITIONING"
+    ],
+    [
+      26,
+      3,
+      0,
+      16,
+      5,
+      "CONDITIONING"
+    ],
+    [
+      27,
+      15,
+      0,
+      16,
+      6,
+      "BBOX_DETECTOR"
+    ],
+    [
+      29,
+      16,
+      1,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      30,
+      1,
+      0,
+      19,
+      1,
+      "MODEL"
+    ],
+    [
+      31,
+      1,
+      1,
+      19,
+      2,
+      "CLIP"
+    ],
+    [
+      32,
+      1,
+      2,
+      19,
+      3,
+      "VAE"
+    ],
+    [
+      33,
+      2,
+      0,
+      19,
+      4,
+      "CONDITIONING"
+    ],
+    [
+      34,
+      3,
+      0,
+      19,
+      5,
+      "CONDITIONING"
+    ],
+    [
+      35,
+      16,
+      0,
+      19,
+      0,
+      "IMAGE"
+    ],
+    [
+      36,
+      18,
+      0,
+      19,
+      6,
+      "BBOX_DETECTOR"
+    ],
+    [
+      37,
+      19,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      38,
+      19,
+      1,
+      20,
+      0,
+      "IMAGE"
+    ],
+    [
+      39,
+      21,
+      0,
+      22,
+      0,
+      "IMAGE"
+    ],
+    [
+      40,
+      22,
+      0,
+      24,
+      0,
+      "IMAGE"
+    ],
+    [
+      41,
+      25,
+      0,
+      26,
+      0,
+      "CONTROL_NET"
+    ],
+    [
+      42,
+      26,
+      0,
+      27,
+      2,
+      "CONTROL_NET"
+    ],
+    [
+      43,
+      22,
+      0,
+      27,
+      3,
+      "IMAGE"
+    ],
+    [
+      44,
+      1,
+      2,
+      27,
+      4,
+      "VAE"
+    ],
+    [
+      45,
+      2,
+      0,
+      27,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      46,
+      3,
+      0,
+      27,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      47,
+      27,
+      0,
+      5,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      48,
+      27,
+      1,
+      5,
+      2,
+      "CONDITIONING"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "1. Base image",
+      "bounding": [
+        400,
+        0,
+        820,
+        1080
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "title": "2. Hires pass",
+      "bounding": [
+        1240,
+        0,
+        340,
+        710
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "title": "3. Finish",
+      "bounding": [
+        2365,
+        0,
+        830,
+        780
+      ],
+      "color": "#b06634",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "title": "2b. Face and hand detailer",
+      "bounding": [
+        1590,
+        0,
+        1130,
+        1440
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "title": "0. Pose / composition reference (ControlNet)",
+      "bounding": [
+        380,
+        1460,
+        1460,
+        720
+      ],
+      "color": "#3f789e"
+    }
+  ],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

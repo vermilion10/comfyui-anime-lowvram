@@ -11,6 +11,7 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 - **Fix faces workflow**: repairs the face and hands of an existing image without changing anything else
 - **Fix region workflow**: paint a mask over any broken area (feet, fabric, a missed hand) and redraw only that area
 - **Expand image workflow**: outpaints the background to a new aspect ratio, for example a portrait image into a 16:9 wallpaper, keeping the original pixels
+- **Pose / composition workflows (ControlNet)**: copy the layout of a reference image, for one character or two, with a depth or pose guide
 - **Close-up / wide workflow**: landscape or square portraits and upper-body shots at about 1 megapixel
 - **Two-character workflow**: regional prompting with one prompt per character, so features do not bleed between them
 - **Style reference workflow**: IP-Adapter colour and lighting reference from up to three images
@@ -47,6 +48,9 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
    | [ComfyUI-Impact-Subpack](https://github.com/ltdrdata/ComfyUI-Impact-Subpack) | Face detector loader |
    | [ComfyUI_IPAdapter_plus](https://github.com/cubiq/ComfyUI_IPAdapter_plus) | Style reference |
    | [ComfyUI-WD14-Tagger](https://github.com/pythongosssss/ComfyUI-WD14-Tagger) | Image to tags |
+   | [comfyui_controlnet_aux](https://github.com/Fannovel16/comfyui_controlnet_aux) | Pose workflows (depth and DWPose preprocessors) |
+
+   For comfyui_controlnet_aux, install only the dependencies the pose workflows need (`omegaconf addict yacs` on top of the portable build) rather than its full `requirements.txt`. Its `onnxruntime-gpu` requirement replaces the CPU `onnxruntime` used by the tagger, and mediapipe/trimesh are only needed for preprocessors these workflows do not use.
 
 6. Download the models into `ComfyUI_windows_portable\ComfyUI\models\`:
 
@@ -57,6 +61,8 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
    | CLIP-ViT-H-14 image encoder | `clip_vision` | [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter/tree/main/models/image_encoder), saved as `CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors` |
    | face_yolov8m.pt | `ultralytics\bbox` | [Bingsu/adetailer](https://huggingface.co/Bingsu/adetailer) |
 | hand_yolov8s.pt | `ultralytics\bbox` | [Bingsu/adetailer](https://huggingface.co/Bingsu/adetailer) |
+| ControlNet Union ProMax (SDXL) | `controlnet` | [xinsir/controlnet-union-sdxl-1.0](https://huggingface.co/xinsir/controlnet-union-sdxl-1.0), `diffusion_pytorch_model_promax.safetensors` saved as `controlnet-union-sdxl-promax.safetensors` |
+| Depth Anything V2 (base) | downloaded by comfyui_controlnet_aux on first use | [depth-anything](https://huggingface.co/depth-anything); the base model is licensed for non-commercial use |
    | wd-eva02-large-tagger-v3 | `custom_nodes\ComfyUI-WD14-Tagger\models` | [SmilingWolf](https://huggingface.co/SmilingWolf/wd-eva02-large-tagger-v3) (downloaded by the node on first use) |
 
    The workflows reference the checkpoint by its published file name. If you use another SDXL anime checkpoint, select it in the Load Checkpoint node.
@@ -76,6 +82,8 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 | `sdxl_anime_hires_face` | Hires workflow plus face and hand detailers | about 240 s |
 | `sdxl_anime_closeup_wide` | Landscape or square close-ups, hires pass, Post FX | about 150 s |
 | `sdxl_anime_two_characters` | Two characters with separate regional prompts | about 150 s |
+| `sdxl_anime_pose` | Hires face workflow guided by the layout of a reference image | about 240 s |
+| `sdxl_anime_pose_two_characters` | Two-character workflow guided by a reference image | about 330 s |
 | `fix_faces` | Redraw the face and hands of an existing image | about 80 to 120 s |
 | `fix_region` | Redraw an area you paint in the MaskEditor | about 30 s |
 | `expand_image` | Extend the background to a new aspect ratio | about 80 s |
@@ -93,6 +101,17 @@ With a single prompt, SDXL models apply every tag to everyone in the image, so o
 - The character prompts switch on at 20% of sampling, after the shared prompt has laid out the composition. Raise this to 0.3 if the characters drift apart; lower it to 0.1 if features still bleed.
 
 Keep each character's distinctive tags only in their own prompt, and use a landscape size. Characters standing directly in front of each other can still mix, since the regions are rectangles.
+
+### Pose and composition reference (ControlNet)
+
+`sdxl_anime_pose` and `sdxl_anime_pose_two_characters` add a reference image to the base pass. Drag any image onto **Pose reference** (a photo, a screenshot, another artwork or one of your renders) and set the latent size to the same aspect ratio. The prompts still decide the characters, outfits, colours and style; the reference decides the layout.
+
+- The default guide is a **depth map** (Depth Anything V2). It captures body shapes, overlaps and who is in front, and works on anime images.
+- **DWPose** (stick-figure pose) is included but unconnected. It works on photos of real people and often fails on anime images, where dark clothes and overlapping bodies confuse it. To use it, connect its output to Apply ControlNet and set the union type to `openpose`.
+- `strength` 0.7 and `end_percent` 0.7 follow the layout closely while leaving the final steps free. Lower strength to 0.5 for looser results.
+- For two characters, keep the left/right order of the reference the same as the Left and Right character prompts. Distinctive features can still bleed where the regions overlap; keep them out of the shared prompt.
+
+ControlNet works best at generation time. Repairing a single hand in a finished image with a hand skeleton is possible, but the redrawn hand tends to be sharper and larger than its surroundings.
 
 ### Fix region
 
