@@ -123,6 +123,14 @@ To remove an object, mask it, describe the background that should replace it (`f
 
 Set the pixels to add on each side in **Pad image**. For a 1248x1824 image, `left 1000, right 1000` gives a 3248x1824 (16:9) wallpaper. Describe only the scenery in the background prompt, without character tags. The new area is generated at about 1.3 megapixels and blended under the untouched original, with `feathering` 200 to hide the seam. The workflow first removes the Post FX vignette (otherwise the dark edges continue into the new area) and re-applies it to the whole new canvas at the end; set both to 0 for images without a vignette.
 
+## Editing tips
+
+- Save a copy before each editing round and branch from it; repairing a repair accumulates artifacts.
+- For small exact details (a ring on the wrong finger), move existing pixels and blend them with a light `fix_region` pass (denoise 0.3) instead of asking the model to draw them.
+- In removal prompts, describe what should be there, never what you are removing, and put likely substitutes (jewelry, bows, hands) in the negative.
+- To make existing structures taller without inventing new ones, copy their own pixels upward as a guide and run `fix_region` over the new area at denoise 0.35.
+- Repair upside-down subjects after rotating the image 180 degrees; the model draws anatomy best the right way up.
+
 ## Prompting tips
 
 - Illustrious models understand Danbooru tags better than sentences: `1girl, solo, short hair, from below, backlighting, rim lighting`.
