@@ -7,9 +7,11 @@ artist_grid/<round>/ and combined into one labeled contact sheet.
 Usage (from E:\\ComfyUI\\ComfyUI_windows_portable):
     python_embeded\\python.exe -I ..\\tools\\artist_grid.py example
 
-Add a new entry to ROUNDS to set up your own comparison.
+Add a new entry to ROUNDS to set up your own comparison. Pass
+--checkpoint <file name> to run the same round on another checkpoint.
 """
 
+import argparse
 import json
 import os
 import sys
@@ -55,11 +57,11 @@ ROUNDS = {
 }
 
 
-def build_prompt(cfg: dict, artists: str, prefix: str) -> dict:
+def build_prompt(cfg: dict, artists: str, prefix: str, checkpoint: str) -> dict:
     text = cfg["prompt"].format(artists=f"{artists},\n" if artists else "")
     width, height = cfg["size"]
     return {
-        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": CHECKPOINT}},
+        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": checkpoint}},
         "2": {"class_type": "CLIPTextEncode", "inputs": {"text": text, "clip": ["1", 1]}},
         "3": {"class_type": "CLIPTextEncode", "inputs": {"text": cfg["negative"], "clip": ["1", 1]}},
         "4": {"class_type": "EmptyLatentImage", "inputs": {"width": width, "height": height, "batch_size": 1}},
@@ -117,15 +119,22 @@ def contact_sheet(items, path, cols=6, cell_h=640):
 
 
 def main():
-    name = sys.argv[1] if len(sys.argv) > 1 else "round1"
-    if name not in ROUNDS:
-        sys.exit(f"Unknown round '{name}'. Available: {', '.join(ROUNDS)}")
-    cfg = ROUNDS[name]
+    parser = argparse.ArgumentParser(description="Queue an artist-tag comparison grid.")
+    parser.add_argument("round", nargs="?", default="round1", help="entry in ROUNDS")
+    parser.add_argument("--checkpoint", default=CHECKPOINT,
+                        help="checkpoint file name; results go to a folder named after it")
+    args = parser.parse_args()
+    if args.round not in ROUNDS:
+        sys.exit(f"Unknown round '{args.round}'. Available: {', '.join(ROUNDS)}")
+    cfg = ROUNDS[args.round]
+    name = args.round
+    if args.checkpoint != CHECKPOINT:
+        name += "_" + os.path.splitext(args.checkpoint)[0]
 
     queued = []
     for i, (label, artists) in enumerate(cfg["artists"], 1):
         prefix = f"artist_grid/{name}/{i:02d}"
-        pid = post("/prompt", {"prompt": build_prompt(cfg, artists, prefix)})["prompt_id"]
+        pid = post("/prompt", {"prompt": build_prompt(cfg, artists, prefix, args.checkpoint)})["prompt_id"]
         queued.append((label, pid))
     print(f"{name}: queued {len(queued)} images", flush=True)
 

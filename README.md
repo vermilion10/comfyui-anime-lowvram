@@ -7,8 +7,9 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 ## Features
 
 - **Low-VRAM hires workflow**: base image, 1.5x upscale and second pass, tiled VAE encode and decode so SDXL fits in 4 GB
-- **Face detailer workflow**: redraws small faces at high resolution, fixing broken eyes in full-body shots
-- **Fix faces workflow**: repairs the face of an existing image without changing anything else
+- **Face and hand detailer workflow**: redraws small faces and hands at high resolution, fixing broken eyes and fingers in full-body shots
+- **Fix faces workflow**: repairs the face and hands of an existing image without changing anything else
+- **Fix region workflow**: paint a mask over any broken area (feet, fabric, a missed hand) and redraw only that area
 - **Close-up / wide workflow**: landscape or square portraits and upper-body shots at about 1 megapixel
 - **Two-character workflow**: regional prompting with one prompt per character, so features do not bleed between them
 - **Style reference workflow**: IP-Adapter colour and lighting reference from up to three images
@@ -54,6 +55,7 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
    | ip-adapter-plus_sdxl_vit-h | `ipadapter` | [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter/tree/main/sdxl_models) |
    | CLIP-ViT-H-14 image encoder | `clip_vision` | [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter/tree/main/models/image_encoder), saved as `CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors` |
    | face_yolov8m.pt | `ultralytics\bbox` | [Bingsu/adetailer](https://huggingface.co/Bingsu/adetailer) |
+| hand_yolov8s.pt | `ultralytics\bbox` | [Bingsu/adetailer](https://huggingface.co/Bingsu/adetailer) |
    | wd-eva02-large-tagger-v3 | `custom_nodes\ComfyUI-WD14-Tagger\models` | [SmilingWolf](https://huggingface.co/SmilingWolf/wd-eva02-large-tagger-v3) (downloaded by the node on first use) |
 
    The workflows reference the checkpoint by its published file name. If you use another SDXL anime checkpoint, select it in the Load Checkpoint node.
@@ -70,10 +72,11 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 |---|---|---|
 | `sdxl_anime_lowvram` | Minimal base image with tiled VAE decode | about 40 s |
 | `sdxl_anime_hires_postfx` | Base, 1.5x hires pass, Post FX | about 150 s |
-| `sdxl_anime_hires_face` | Hires workflow plus FaceDetailer | about 200 s |
+| `sdxl_anime_hires_face` | Hires workflow plus face and hand detailers | about 240 s |
 | `sdxl_anime_closeup_wide` | Landscape or square close-ups, hires pass, Post FX | about 150 s |
 | `sdxl_anime_two_characters` | Two characters with separate regional prompts | about 150 s |
-| `fix_faces` | Redraw the face of an existing image | about 40 s |
+| `fix_faces` | Redraw the face and hands of an existing image | about 80 to 120 s |
+| `fix_region` | Redraw an area you paint in the MaskEditor | about 30 s |
 | `sdxl_anime_style_ref` | Hires workflow plus IP-Adapter style reference | about 170 s |
 | `image_to_tags` | Danbooru tags for any image | a few seconds |
 
@@ -89,12 +92,17 @@ With a single prompt, SDXL models apply every tag to everyone in the image, so o
 
 Keep each character's distinctive tags only in their own prompt, and use a landscape size. Characters standing directly in front of each other can still mix, since the regions are rectangles.
 
+### Fix region
+
+For problems no detector finds, such as feet. Right-click the **Image to fix** node, choose **Open in MaskEditor**, paint over the area and save. In the masked area prompt, describe only what belongs there (`barefoot, foot, toes`) plus the original artist tags; the full character prompt can make the model draw a face in the mask. Denoise 0.55 keeps the original shape, 0.65 redraws it with more detail but can add stray pieces.
+
 ## Prompting tips
 
 - Illustrious models understand Danbooru tags better than sentences: `1girl, solo, short hair, from below, backlighting, rim lighting`.
 - Escape parentheses in tags: `character \(series\)`.
 - Artist tags control the drawing style. Mix two or three with weights, for example `(artist a:0.7), (artist b:0.5)`.
 - Negative prompts apply to the whole image. Put colours in the positive prompt instead of negating them.
+- Keep artist weights at 1.3 or lower. Higher weights start to override character details such as eye shape. To favour one artist, lower the others instead.
 - Keep `logo, artist name, text` in the negative prompt; some artist tags make the model draw signatures.
 
 ## Anime Post FX node
@@ -120,7 +128,7 @@ python_embeded\python.exe -I ..\tools\tag_folder.py "D:\images" "D:\tag_report" 
 python_embeded\python.exe -I ..\tools\prepare_lora_dataset.py <images> <tags_per_image.txt> <out_dir> "<trigger>" 2
 ```
 
-- `artist_grid.py` queues images that share a prompt and seed and differ only in artist tags, then builds a labelled contact sheet. Edit the `ROUNDS` dictionary to define comparisons. ComfyUI must be running.
+- `artist_grid.py` queues images that share a prompt and seed and differ only in artist tags, then builds a labelled contact sheet. Edit the `ROUNDS` dictionary to define comparisons, and add `--checkpoint <file name>` to run the same round on another checkpoint. ComfyUI must be running.
 - `tag_folder.py` tags every image in a folder and writes per-image tags plus a frequency summary. Requires the WD EVA02 tagger model.
 - `prepare_lora_dataset.py` crops, resizes and captions images into a kohya-style LoRA training folder.
 
