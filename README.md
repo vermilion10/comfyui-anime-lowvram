@@ -1,6 +1,6 @@
 # ComfyUI Anime Low-VRAM Workflows
 
-ComfyUI workflows, a post-processing node and helper scripts for anime image generation with SDXL / Illustrious models on GPUs with 4 GB of VRAM.
+ComfyUI workflows, a post-processing node and helper scripts for anime image generation with SDXL / Illustrious and Anima models on GPUs with 4 GB of VRAM.
 
 Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1216 image with a 1.5x hires pass and face detailing takes about 3 minutes.
 
@@ -16,6 +16,7 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 - **Two-character workflow**: regional prompting with one prompt per character, so features do not bleed between them
 - **Style reference workflow**: IP-Adapter colour and lighting reference from up to three images
 - **Image to tags workflow**: WD EVA02 tagger that turns any image into Danbooru tags
+- **Anima workflows**: text-to-image with the Anima Turbo model in about 20 s, and a full version with hires pass, face and hand detailers and Post FX
 - **Anime Post FX node**: bloom, chromatic aberration, vignette and film grain, processed on the CPU
 - **Helper scripts**: artist-tag comparison grids, batch image tagging with tag statistics, and LoRA dataset preparation
 
@@ -63,6 +64,9 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 | hand_yolov8s.pt | `ultralytics\bbox` | [Bingsu/adetailer](https://huggingface.co/Bingsu/adetailer) |
 | ControlNet Union ProMax (SDXL) | `controlnet` | [xinsir/controlnet-union-sdxl-1.0](https://huggingface.co/xinsir/controlnet-union-sdxl-1.0), `diffusion_pytorch_model_promax.safetensors` saved as `controlnet-union-sdxl-promax.safetensors` |
 | Depth Anything V2 (base) | downloaded by comfyui_controlnet_aux on first use | [depth-anything](https://huggingface.co/depth-anything); the base model is licensed for non-commercial use |
+   | Anima Turbo v1.1 (`anima-turbo-v1.1.safetensors`), optionally Anima Base v1.0 | `diffusion_models` | [circlestone-labs/Anima](https://huggingface.co/circlestone-labs/Anima); the model is licensed for non-commercial use |
+   | Qwen3 0.6B text encoder (`qwen_3_06b_base.safetensors`) | `text_encoders` | [circlestone-labs/Anima](https://huggingface.co/circlestone-labs/Anima) |
+   | Qwen-Image VAE (`qwen_image_vae.safetensors`) | `vae` | [circlestone-labs/Anima](https://huggingface.co/circlestone-labs/Anima) |
    | wd-eva02-large-tagger-v3 | `custom_nodes\ComfyUI-WD14-Tagger\models` | [SmilingWolf](https://huggingface.co/SmilingWolf/wd-eva02-large-tagger-v3) (downloaded by the node on first use) |
 
    The workflows reference the checkpoint by its published file name. If you use another SDXL anime checkpoint, select it in the Load Checkpoint node.
@@ -89,8 +93,20 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 | `expand_image` | Extend the background to a new aspect ratio | about 80 s |
 | `sdxl_anime_style_ref` | Hires workflow plus IP-Adapter style reference | about 170 s |
 | `image_to_tags` | Danbooru tags for any image | a few seconds |
+| `anima_turbo` | Anima Turbo base image | about 20 s |
+| `anima_hires_face` | Anima with 1.5x hires pass, face and hand detailers, Post FX | about 105 s |
 
 To explore prompts quickly, select the hires and finish groups and press **Ctrl+B** to bypass them. Once a base image looks right, set its seed to fixed and enable them again.
+
+### Anima
+
+[Anima](https://huggingface.co/circlestone-labs/Anima) is a 2B anime model that is not based on SDXL. It does not appear in Load Checkpoint, because it ships as three files with their own loader nodes: **Load Diffusion Model** (`anima-turbo-v1.1`), **Load CLIP** (`qwen_3_06b_base`, type `stable_diffusion`) and **Load VAE** (`qwen_image_vae`). No custom nodes are needed for the base workflow.
+
+- **Turbo** (default): 10 steps, cfg 1.0, euler, simple. At cfg 1.0 ComfyUI skips the negative prompt, so describe what you want in the positive prompt instead of negating what you don't.
+- **Base**: select `anima-base-v1.0` and use 30 steps, cfg 4.0, er_sde, simple. It follows the prompt more closely and uses the negative prompt, but takes 3 to 4 times as long.
+- **Prompts** start with `masterpiece, best quality, score_7, safe`, then Danbooru tags, then plain sentences. The text encoder is a language model, so full descriptions of the scene, pose and lighting work well, and ComfyUI does not cut long prompts at 77 tokens. Artist tags take an `@` prefix and work without weights.
+- **LoRAs**: only LoRAs trained for Anima work; SDXL and Illustrious LoRAs do not. The Load LoRA node is bypassed by default. To stack several, chain more Load LoRA nodes (MODEL and CLIP out of one into the next).
+- `anima_hires_face` uses the same hires pass, detailers and Post FX as `sdxl_anime_hires_face`, with all samplers set to the Turbo settings. Avoid describing a "camera" in the prompt; the model may draw one in the picture.
 
 ### Two characters
 
@@ -132,6 +148,8 @@ Set the pixels to add on each side in **Pad image**. For a 1248x1824 image, `lef
 - Repair upside-down subjects after rotating the image 180 degrees; the model draws anatomy best the right way up.
 
 ## Prompting tips
+
+These apply to the SDXL / Illustrious workflows. For Anima, see [Anima](#anima).
 
 - Illustrious models understand Danbooru tags better than sentences: `1girl, solo, short hair, from below, backlighting, rim lighting`.
 - Escape parentheses in tags: `character \(series\)`.
