@@ -95,6 +95,8 @@ Tested on an RTX 2050 Laptop (4 GB VRAM) with 24 GB of system RAM, where a 832x1
 | `image_to_tags` | Danbooru tags for any image | a few seconds |
 | `anima_turbo` | Anima Turbo base image | about 20 s |
 | `anima_hires_face` | Anima with 1.5x hires pass, face and hand detailers, Post FX | about 105 s |
+| `anima_fix_faces` | `fix_faces` for images made with Anima | about 25 s |
+| `anima_fix_region` | `fix_region` for images made with Anima | about 20 s |
 
 To explore prompts quickly, select the hires and finish groups and press **Ctrl+B** to bypass them. Once a base image looks right, set its seed to fixed and enable them again.
 
@@ -104,9 +106,10 @@ To explore prompts quickly, select the hires and finish groups and press **Ctrl+
 
 - **Turbo** (default): 10 steps, cfg 1.0, euler, simple. At cfg 1.0 ComfyUI skips the negative prompt, so describe what you want in the positive prompt instead of negating what you don't.
 - **Base**: select `anima-base-v1.0` and use 30 steps, cfg 4.0, er_sde, simple. It follows the prompt more closely and uses the negative prompt, but takes 3 to 4 times as long.
-- **Prompts** start with `masterpiece, best quality, score_7, safe`, then Danbooru tags, then plain sentences. The text encoder is a language model, so full descriptions of the scene, pose and lighting work well, and ComfyUI does not cut long prompts at 77 tokens. Artist tags take an `@` prefix and work without weights.
+- **Prompts** start with `masterpiece, best quality, score_7, safe`, then Danbooru tags, then plain sentences. The text encoder is a language model, so full descriptions of the scene, pose and lighting work well, and ComfyUI does not cut long prompts at 77 tokens. Artist tags take an `@` prefix and work without weights. ComfyUI still reads parentheses as emphasis, so escape them in character tags: `character \(series\)`.
 - **LoRAs**: only LoRAs trained for Anima work; SDXL and Illustrious LoRAs do not. The Load LoRA node is bypassed by default. To stack several, chain more Load LoRA nodes (MODEL and CLIP out of one into the next).
 - `anima_hires_face` uses the same hires pass, detailers and Post FX as `sdxl_anime_hires_face`, with all samplers set to the Turbo settings. Avoid describing a "camera" in the prompt; the model may draw one in the picture.
+- `anima_fix_faces` and `anima_fix_region` work like their SDXL versions, with the detailer on Anima Turbo. Use them on Anima images and the SDXL versions on SDXL images, so the redrawn area keeps the style of the original. If the original used a LoRA, enable the same one.
 
 ### Two characters
 

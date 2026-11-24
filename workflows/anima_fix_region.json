@@ -1,0 +1,695 @@
+{
+  "last_node_id": 14,
+  "last_link_id": 15,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        40,
+        80
+      ],
+      "size": [
+        380,
+        560
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            2
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example_face_fix.png",
+        "image"
+      ],
+      "title": "Image to fix (paint a mask in MaskEditor)"
+    },
+    {
+      "id": 3,
+      "type": "CLIPTextEncode",
+      "pos": [
+        460,
+        80
+      ],
+      "size": [
+        420,
+        220
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            10
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, score_7, safe, @artist name,\n\nbarefoot, foot, toes"
+      ],
+      "title": "Masked area prompt (what to draw there)"
+    },
+    {
+      "id": 4,
+      "type": "CLIPTextEncode",
+      "pos": [
+        460,
+        340
+      ],
+      "size": [
+        420,
+        140
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            11
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "worst quality, low quality, score_1, score_2, score_3, artist name, blurry, jpeg artifacts, nsfw, explicit, text, watermark, signature"
+      ],
+      "title": "Negative prompt"
+    },
+    {
+      "id": 5,
+      "type": "GrowMask",
+      "pos": [
+        460,
+        530
+      ],
+      "size": [
+        300,
+        90
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GrowMask"
+      },
+      "widgets_values": [
+        16,
+        true
+      ],
+      "title": "Grow mask (soft edge)"
+    },
+    {
+      "id": 6,
+      "type": "MaskToSEGS",
+      "pos": [
+        460,
+        660
+      ],
+      "size": [
+        300,
+        160
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SEGS",
+          "type": "SEGS",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskToSEGS"
+      },
+      "widgets_values": [
+        false,
+        3.0,
+        false,
+        10,
+        true
+      ]
+    },
+    {
+      "id": 7,
+      "type": "DetailerForEach",
+      "pos": [
+        920,
+        80
+      ],
+      "size": [
+        360,
+        700
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "segs",
+          "type": "SEGS",
+          "link": 4
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 5
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 6
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 7
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 10
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 11
+        },
+        {
+          "name": "detailer_hook",
+          "type": "DETAILER_HOOK",
+          "link": null
+        },
+        {
+          "name": "scheduler_func_opt",
+          "type": "SCHEDULER_FUNC",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            12
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DetailerForEach"
+      },
+      "widgets_values": [
+        768,
+        true,
+        1024,
+        0,
+        "fixed",
+        10,
+        1.0,
+        "euler",
+        "simple",
+        0.55,
+        8,
+        true,
+        true,
+        "",
+        1,
+        false,
+        20,
+        false,
+        false
+      ],
+      "title": "Redraw masked area"
+    },
+    {
+      "id": 8,
+      "type": "AnimePostFX",
+      "pos": [
+        1320,
+        80
+      ],
+      "size": [
+        300,
+        250
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            13
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimePostFX"
+      },
+      "widgets_values": [
+        0.0,
+        40.0,
+        0.65,
+        0.0,
+        0.0,
+        0.01,
+        0,
+        "fixed"
+      ],
+      "title": "Grain only (optional, bypassed)"
+    },
+    {
+      "id": 9,
+      "type": "SaveImage",
+      "pos": [
+        1660,
+        80
+      ],
+      "size": [
+        460,
+        700
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "anima/region_fixed"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [
+        40,
+        1260
+      ],
+      "size": [
+        400,
+        700
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "Fix any area of an existing image (Anima)\n\nAnima loads as three files: Load Diffusion Model (anima-turbo-v1.1), Load CLIP (qwen_3_06b_base, type stable_diffusion) and Load VAE (qwen_image_vae). Use it on images made with Anima; for SDXL images use the SDXL version of this workflow, so the redrawn area matches the original style.\n\nTurbo settings in the detailer: steps 10, cfg 1.0, euler, simple. At cfg 1.0 the negative prompt is skipped. For Anima Base use steps 20, cfg 4.0, er_sde, simple.\n\nIf the original image used a LoRA, enable the Load LoRA node (Ctrl+B), pick the same LoRA and add its trigger word. Escape parentheses in tags: character \\(series\\).\n\nUse this for things no detector finds: feet, broken fabric, a stray object, a missed hand.\n\n1. Drag the PNG onto the Image to fix node.\n2. Right-click the node and choose Open in MaskEditor. Paint over the area to redraw, a little larger than the problem, then press Save. Several separate spots can be painted at once.\n3. In the Masked area prompt, describe only what should be inside the mask (for a foot: barefoot, foot, toes), plus the same artist tags as the original. Do not paste the full character prompt, or the model may draw a face there.\n4. Press Run. The result is saved as anima/region_fixed_xxxxx.png. Only the masked area changes.\n\ndenoise 0.55 is the default and keeps the original shape. Raise it to 0.65 to redraw a badly wrong shape; it draws real detail such as toes, but can add a stray extra piece, so try a few seeds. Lower it to 0.4 if the area should only be cleaned up. If the result is still wrong, set the seed to randomize and run again.\n\nThe redrawn area has no film grain. If that stands out, un-bypass the Grain only node (select it, Ctrl+B)."
+      ],
+      "title": "How to use"
+    },
+    {
+      "id": 11,
+      "type": "UNETLoader",
+      "title": "Load Diffusion Model",
+      "pos": [
+        40,
+        700
+      ],
+      "size": [
+        340,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            14
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "anima-turbo-v1.1.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "CLIPLoader",
+      "title": "Load CLIP (text encoder)",
+      "pos": [
+        40,
+        820
+      ],
+      "size": [
+        340,
+        106
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            15
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_3_06b_base.safetensors",
+        "stable_diffusion",
+        "default"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "VAELoader",
+      "title": "Load VAE",
+      "pos": [
+        40,
+        960
+      ],
+      "size": [
+        340,
+        58
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "qwen_image_vae.safetensors"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "LoraLoader",
+      "title": "Load LoRA (Ctrl+B to bypass)",
+      "pos": [
+        40,
+        1050
+      ],
+      "size": [
+        340,
+        126
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 14
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            5
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            6,
+            8,
+            9
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoraLoader"
+      },
+      "widgets_values": [
+        "anima\\aniframe_v1.1.safetensors",
+        0.9,
+        0.9
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      7,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      1,
+      1,
+      5,
+      0,
+      "MASK"
+    ],
+    [
+      3,
+      5,
+      0,
+      6,
+      0,
+      "MASK"
+    ],
+    [
+      4,
+      6,
+      0,
+      7,
+      1,
+      "SEGS"
+    ],
+    [
+      5,
+      14,
+      0,
+      7,
+      2,
+      "MODEL"
+    ],
+    [
+      6,
+      14,
+      1,
+      7,
+      3,
+      "CLIP"
+    ],
+    [
+      7,
+      13,
+      0,
+      7,
+      4,
+      "VAE"
+    ],
+    [
+      8,
+      14,
+      1,
+      3,
+      0,
+      "CLIP"
+    ],
+    [
+      9,
+      14,
+      1,
+      4,
+      0,
+      "CLIP"
+    ],
+    [
+      10,
+      3,
+      0,
+      7,
+      5,
+      "CONDITIONING"
+    ],
+    [
+      11,
+      4,
+      0,
+      7,
+      6,
+      "CONDITIONING"
+    ],
+    [
+      12,
+      7,
+      0,
+      8,
+      0,
+      "IMAGE"
+    ],
+    [
+      13,
+      8,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      14,
+      11,
+      0,
+      14,
+      0,
+      "MODEL"
+    ],
+    [
+      15,
+      12,
+      0,
+      14,
+      1,
+      "CLIP"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}
